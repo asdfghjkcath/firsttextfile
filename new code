@@ -1,0 +1,60 @@
+utangForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('utang-name').value;
+  const amount = Number(document.getElementById('utang-amount').value);
+  const type = document.getElementById('utang-type').value;
+  const note = document.getElementById('utang-note').value;
+
+  if (editType === 'utang') {
+    utangList[editIndex] = { name, amount, type, note, paid: utangList[editIndex].paid };
+  } else {
+    utangList.push({ name, amount, type, note, paid: false });
+  }
+
+  saveData();
+  renderUtangs();
+  utangForm.reset();
+  editIndex = null;
+  editType = null;
+});
+Update renderUtangs():
+
+javascript
+Copy
+Edit
+function renderUtangs() {
+  utangListElement.innerHTML = '';
+  let totalOwe = 0;
+  let totalCollect = 0;
+
+  utangList.forEach((utang, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <strong>${utang.name}</strong> - ₱${utang.amount} (${utang.type === 'owe' ? 'I owe' : 'They owe me'})
+      ${utang.note ? `<br><em>${utang.note}</em>` : ''}
+      ${utang.paid ? `<br><span style="color:green">[Paid]</span>` : ''}
+      <br>
+      <button onclick="markUtangPaid(${index})">Mark as Paid</button>
+      <button onclick="editUtang(${index})">Edit</button>
+    `;
+    utangListElement.appendChild(li);
+
+    if (!utang.paid) {
+      if (utang.type === 'owe') totalOwe += utang.amount;
+      else totalCollect += utang.amount;
+    }
+  });
+
+  totalOweDisplay.textContent = totalOwe;
+  totalCollectDisplay.textContent = totalCollect;
+}
+
+function editUtang(index) {
+  const utang = utangList[index];
+  document.getElementById('utang-name').value = utang.name;
+  document.getElementById('utang-amount').value = utang.amount;
+  document.getElementById('utang-type').value = utang.type;
+  document.getElementById('utang-note').value = utang.note;
+  editIndex = index;
+  editType = 'utang';
+}
